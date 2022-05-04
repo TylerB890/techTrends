@@ -35,4 +35,9 @@ spec:
             path: { .Values.readinessProbePath}
             port: { .Values.containerPort}
         resources:
-{{ toYaml .Values.resources | indent 12 }}
+          requests:
+            cpu: { .Values.resource.requests.cpu}
+            memory: { .Values.resource.requests.memory}
+          limits:
+            cpu: { .Values.resource.limits.cpu}
+            memory: { .Values.resource.limits.memory}
