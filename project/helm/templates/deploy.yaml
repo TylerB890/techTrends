@@ -35,4 +35,4 @@ spec:
             path: { .Values.readinessProbePath}
             port: { .Values.containerPort}
         resources:
-        {{ toYaml .Values.resources | indent 11 }}
+{{ toYaml .Values.resources | indent 12 }}
