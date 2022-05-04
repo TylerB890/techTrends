@@ -1,6 +1,7 @@
 import sqlite3
 import logging
 import sys
+import os
 
 from flask import Flask, jsonify, json, render_template, request, url_for, redirect, flash
 from werkzeug.exceptions import abort
@@ -10,9 +11,14 @@ from werkzeug.exceptions import abort
 # This function connects to database with the name `database.db`
 def get_db_connection():
     get_db_connection.counter += 1
-    connection = sqlite3.connect('database.db')
-    connection.row_factory = sqlite3.Row
+    try:
+        connection = sqlite3.connect('database.db')
+        connection.row_factory = sqlite3.Row
+    except sqlite3.OperationalError:
+        app.logger.error('database.db file does not exist. likely init_db.py was not executed before this application')
+        assert('database.db file does not exist. likely init_db.py was not executed before this application')
     return connection
+        
 
 # Function to get a post using its ID
 def get_post(post_id):
@@ -40,7 +46,7 @@ def index():
 def post(post_id):
     post = get_post(post_id)
     if post is None:
-      app.logger.info('Article with id: ' + str(post_id) + ' does not exist and returned 404 page')
+      app.logger.error('Article with id: %s does not exist and returned 404 page', post_id)
       return render_template('404.html'), 404
     else:
       app.logger.info('Article "{}" retrieved!'.format(post[2]))
@@ -68,7 +74,7 @@ def create():
             connection.commit()
             connection.close()
             
-            app.logger.info('New article: "' + title + '" created!')
+            app.logger.info('New article: "%s" created!', title)
             return redirect(url_for('index'))
 
     return render_template('create.html')
@@ -76,12 +82,10 @@ def create():
 # Define the livelinessProbe and readinessProbe endpoint
 @app.route('/healthz')
 def healthcheck():
-    response = app.response_class(
-            response=json.dumps({"result":"OK - healthy"}),
-            status=200,
-            mimetype='application/json'
-    )
-    return response
+    if os.path.exists('database.db'):
+        return jsonify({"result": "OK - healthy"})
+    else:
+        return jsonify({"result": "Error - Missing {}".format('database.db')}), 500
 
 @app.route('/metrics')
 def metrics():
@@ -110,5 +114,5 @@ if __name__ == "__main__":
     handler.setFormatter(formatter)
     root.addHandler(handler)
 
-    logging.basicConfig(stream = sys.stdout, level=logging.INFO, format=format_string)
+    logging.basicConfig(stream = sys.stdout, level=logging.DEBUG, format=format_string)
     app.run(host='0.0.0.0', port='3111')
