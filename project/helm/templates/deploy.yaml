@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: techtrends
+  name: techtrends
+  namespace: { .Values.namespace.name }
+spec:
+  replicas: { .Values.replicaCount}
+  selector:
+    matchLabels:
+      app: techtrends
+  template:
+    metadata:
+      labels:
+        app: techtrends
+    spec:
+      containers:
+      - image: abugarciapro/{.Values.image.repository}:{.Values.image.tag}
+        imagePullPolicy: { .Values.image.pullPolicy}
+        name: techtrends
+        ports:
+        - containerPort: { .Values.containerPort}
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            host:
+            scheme: HTTP
+            path: { .Values.livelinessProbePath}
+            port: { .Values.containerPort}
+        readinessProbe:
+          httpGet:
+            host:
+            scheme: HTTP
+            path: { .Values.readinessProbePath}
+            port: { .Values.containerPort}
+        resources:
+        {{ toYaml .Values.resources | indent 12 }}
