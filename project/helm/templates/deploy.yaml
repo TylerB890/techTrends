@@ -4,9 +4,9 @@ metadata:
   labels:
     app: techtrends
   name: techtrends
-  namespace: { .Values.namespace.name }
+  namespace: {{ .Values.namespace.name }}
 spec:
-  replicas: { .Values.replicaCount}
+  replicas: {{ .Values.replicaCount}}
   selector:
     matchLabels:
       app: techtrends
@@ -16,28 +16,28 @@ spec:
         app: techtrends
     spec:
       containers:
-      - image: abugarciapro/{.Values.image.repository}:{.Values.image.tag}
-        imagePullPolicy: { .Values.image.pullPolicy}
+      - image: abugarciapro/{{ .Values.image.repository }}:{{.Values.image.tag}}
+        imagePullPolicy: {{ .Values.image.pullPolicy}}
         name: techtrends
         ports:
-        - containerPort: { .Values.containerPort}
+        - containerPort: {{ .Values.containerPort}}
           protocol: TCP
         livenessProbe:
           httpGet:
             host:
             scheme: HTTP
-            path: { .Values.livelinessProbePath}
-            port: { .Values.containerPort}
+            path: {{ .Values.livelinessProbePath}}
+            port: {{ .Values.containerPort}}
         readinessProbe:
           httpGet:
             host:
             scheme: HTTP
-            path: { .Values.readinessProbePath}
-            port: { .Values.containerPort}
+            path: {{ .Values.readinessProbePath}}
+            port: {{ .Values.containerPort}}
         resources:
           requests:
-            cpu: { .Values.resource.requests.cpu}
-            memory: { .Values.resource.requests.memory}
+            cpu: {{ .Values.resource.requests.cpu}}
+            memory: {{ .Values.resource.requests.memory}}
           limits:
-            cpu: { .Values.resource.limits.cpu}
-            memory: { .Values.resource.limits.memory}
+            cpu: {{ .Values.resource.limits.cpu}}
+            memory: {{ .Values.resource.limits.memory}}
